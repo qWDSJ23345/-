@@ -19,16 +19,15 @@ jobs:
         dotnet-version: '8.0.x' 
 
     - name: 恢复项目依赖
-      # 加入强制 x64 参数，防止恢复依赖时出错
-      run: dotnet restore -p:Platform=x64
+      run: dotnet restore
 
     - name: 执行编译与发布
-      # 移除了 -o 参数，并加入了 -p:Platform=x64 和 -p:PlatformTarget=x64 强制镇压 ARM64 冲突
-      run: dotnet publish -c Release -r win-x64 -p:Platform=x64 -p:PlatformTarget=x64 --self-contained true
+      # 【关键点】这里我们不再编译整个解决方案，而是只编译核心的 Core 项目
+      # 请将 HaloPixelToolBox.Core.csproj 换成你项目里真正的主程序文件名（如果有多个，可以尝试只指定那个 .csproj）
+      run: dotnet publish HaloPixelToolBox.Core/HaloPixelToolBox.Core.csproj -c Release -r win-x64 --self-contained true -o ./output_folder
 
     - name: 上传编译结果供下载
       uses: actions/upload-artifact@v4
       with:
         name: 编译完成的软件包
-        # 既然不能指定输出目录，我们就用通配符，让它自动去默认的 Release 目录下把 publish 文件夹抓出来打包
-        path: '**/bin/Release/**/publish'
+        path: ./output_folder
