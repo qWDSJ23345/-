@@ -19,14 +19,13 @@ jobs:
         dotnet-version: '8.0.x' 
 
     - name: 恢复项目依赖
-      run: dotnet restore
+      run: dotnet restore HaloPixelToolBox/HaloPixelToolBox.Core/HaloPixelToolBox.Core.csproj
 
     - name: 执行编译与发布
-      # 【关键点】这里我们不再编译整个解决方案，而是只编译核心的 Core 项目
-      # 请将 HaloPixelToolBox.Core.csproj 换成你项目里真正的主程序文件名（如果有多个，可以尝试只指定那个 .csproj）
-      run: dotnet publish HaloPixelToolBox.Core/HaloPixelToolBox.Core.csproj -c Release -r win-x64 --self-contained true -o ./output_folder
+      # 这一次我们精准定位到该 csproj 文件进行编译
+      run: dotnet publish HaloPixelToolBox/HaloPixelToolBox.Core/HaloPixelToolBox.Core.csproj -c Release -r win-x64 --self-contained true -o ./output_folder
 
-    - name: 上传编译结果供下载
+    - name: 上传编译结果
       uses: actions/upload-artifact@v4
       with:
         name: 编译完成的软件包
