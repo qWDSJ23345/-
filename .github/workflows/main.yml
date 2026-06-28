@@ -1,6 +1,5 @@
 name: 自动编译 WinUI 3 应用
 
-# 当代码推送到主分支，或者手动点击按钮时触发编译
 on:
   push:
     branches: [ "main" ]
@@ -8,7 +7,6 @@ on:
 
 jobs:
   build:
-    # 核心：直接使用微软官方预装好所有环境的 Windows 服务器
     runs-on: windows-latest 
 
     steps:
@@ -18,17 +16,19 @@ jobs:
     - name: 安装 .NET 环境
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x' # 如果你的项目是 .NET 6 或 7，请修改这里
+        dotnet-version: '8.0.x' 
 
-    - name: 恢复项目依赖 (NuGet包)
-      run: dotnet restore
+    - name: 恢复项目依赖
+      # 加入强制 x64 参数，防止恢复依赖时出错
+      run: dotnet restore -p:Platform=x64
 
     - name: 执行编译与发布
-      # 【这里已修正：由 win10-x64 改为了 win-x64】
-      run: dotnet publish -c Release -r win-x64 --self-contained true -o ./output_folder
+      # 移除了 -o 参数，并加入了 -p:Platform=x64 和 -p:PlatformTarget=x64 强制镇压 ARM64 冲突
+      run: dotnet publish -c Release -r win-x64 -p:Platform=x64 -p:PlatformTarget=x64 --self-contained true
 
     - name: 上传编译结果供下载
       uses: actions/upload-artifact@v4
       with:
-        name: 编译完成的软件包 # 下载时的压缩包名称
-        path: ./output_folder # 将这个文件夹打包给用户下载
+        name: 编译完成的软件包
+        # 既然不能指定输出目录，我们就用通配符，让它自动去默认的 Release 目录下把 publish 文件夹抓出来打包
+        path: '**/bin/Release/**/publish'
