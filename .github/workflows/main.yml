@@ -24,8 +24,8 @@ jobs:
       run: dotnet restore
 
     - name: 执行编译与发布
-      # 编译为 Release 版本，目标平台为 win10-x64，且包含独立运行环境（不需要用户电脑安装.NET）
-      run: dotnet publish -c Release -r win10-x64 --self-contained true -o ./output_folder
+      # 【这里已修正：由 win10-x64 改为了 win-x64】
+      run: dotnet publish -c Release -r win-x64 --self-contained true -o ./output_folder
 
     - name: 上传编译结果供下载
       uses: actions/upload-artifact@v4
